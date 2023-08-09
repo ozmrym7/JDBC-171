@@ -1,0 +1,445 @@
+----------------jdbs  notlar   ------------
+
+//jdbs nedir ?  ==> 'java data connectivity'  ==> java kodlarını kullanarak database bağlanıp
+                                                 gerekli işlemleri yapıyoruz , veri okuma veri ekleme vs yani kısace sql de
+                                                 yapılan işlemleri java kodları ile yapıyoruz
+
+
+
+/*
+yapılacak adımlar sıralaması
+
+1 - connection   --> bağlanma
+2 - statement    --> çalıştırma(yürütme)
+3 - resultSet  ==>   execute --> executeQuery, executeUpdate vs her ne yapacaksak kullanacağız --> sorgu sonucunda elde edilen verileri tutmak için kullanılır
+
+*/
+
+
+1) --> connection  --->  veritabanına  bağlanmak için kullanılır.
+
+// database bağlanabilmemiz için önce "driver" a ihtiyacımız var
+
+// connection oluşturma nasıl yapılır ?
+DriverManager.getConnection()  ===> // methodu çağrılarak DriverManager class ile DBMS  bağlantısı sağlanır
+                                    // bu method 3 parametre ile çalışıyor
+
+Connection con = DriverManager.getConnection( "jdbs:hostName:databaseName", username, password);
+
+
+
+2) --> statement --> // Statement, veritabanında SQL sorgularını yürütmek için kullanılan nesnedir.
+                     // Connection üzerinden oluşturulur ve ardından SQL sorgularını çalıştırmak için kullanılır
+
+Statement stmt = con.createStatement();
+
+
+
+3) --> ResultSet  --> //ResultSet, veritabanından yapılan bir sorgu sonucunda elde edilen verileri tutmak için kullanılır
+                      // yani sonuçlarımızın seti, bize karşıdan gelen datanın set olarak kaydolduğu yer
+                     //ResultSet üzerinde ileri veya geri hareket ederek verilere erişmek ve işlemek mümkündür.
+                     //Örneğin, veritabanından çekilen bir tablo sonucunda, ResultSet ile tablodaki her bir satıra ulaşabilirsiniz.
+
+ResultSet rs = stmt.executeQuery("SELECT a,b,c FROM Table1");
+
+
+/*
+
+bir maven projesi açtığımız zaman pom.xml dosyası otomatik olarak açılır . Peki pom xml nedir ?
+
+==> maven in en önemli dosyası , proje yönetimi için kullanılır , yapılandırma bilgilerini içeriyor
+Bu XML formatındaki dosya, projenin bağımlılıklarını, sürüm numaralarını, proje adını, yapılandırma ayarlarını ve diğer önemli bilgileri tanımlar.
+biz oraya "dependencies" ekleyerek projemiz için gerekli olan library leri yani kütüphaneleri  ekleriz
+
+
+==> -projeyi ilk açtığımızda "external libraries" te java nın kendi kütüphaneleri var
+    -fakat bizim  burada jdbs kütüphanelerine ihtiyacımız var
+    -bunları biz "jar" dosyası olarak indirip buraya ekleyebiliyoruz manuel olarak fakat buna gerek yok çünkü dependencies kullanıyoruz o otomatik olarak yapıyor
+
+==> "dependencies" dediğimiz olay ihtiyacımız olan harici kütüphaneleri eklediğimiz yer
+
+Java projelerinde dependencies,
+projenin dışa bağımlı olduğu ve proje kodunun işlevselliğini artırmak veya kolaylaştırmak için kullandığı kütüphaneler ve bileşenlerdir.
+
+<dependencies>
+
+  "buraya  harici kütüphanelerimizi ekliyoruz"
+
+</dependencies>
+
+---------------------------------------------------------------
+mvnrepository sitesine giderek PostgreSQL JDBC Driver son sürümü seçiyoruz
+
+bu şekilde kütüphanemizi projemize ekliyoruz ===>
+
+<dependencies>
+
+    <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.6.0</version>
+    </dependency>
+
+
+</dependencies>
+
+
+
+-burda kızarıklık çıkıyor ilk başta bunu gidermek için  sağda çıkan "load maven changes" simgesine tıklıyoruz
+-kızarıklık yine gitmezse sağ tık > maven > reload project diyebiliriz
+
+bu sayede kütüphanemizi projemize eklemiş olduk artık "External Libraries" altında eklediğimiz kütüphaneler
+gözükecektir jar. (java archive) dosyası şeklinde ..
+
+
+
+pom.xml, Java proje yönetimi için kullanılan bir dosyadır ve Maven proje yöneticisi tarafından kullanılır.
+
+Maven, Java projelerinin bağımlılıklarını yönetmek, projeyi derlemek, test etmek ve dağıtmak gibi çeşitli görevleri otomatikleştiren bir araçtır.
+Maven, ayrıca projeleri derleyen, test eden, paketleyen ve dağıtmaya hazır hale getiren karmaşık yapıları otomatikleştirerek geliştiricilere zaman kazandırır.
+Böylece proje ekibi, daha az zaman harcayarak daha verimli bir şekilde yazılım geliştirebilir.
+
+pom.xml dosyası, bir Maven projesinin yapılandırma bilgilerini içerir.
+
+---------------------------------------------------------------
+
+
+src nin altında main klasörü var  bu kısım developerlerin kullandığı oluşturacağımız uygulamanın kodlarının yazıldığı yer
+                test klasörü de testlerin yapılacağı yer , testerlar burada çalışıyor
+
+*/
+/*
+
+
+==>  ilk olarak src > main > java    klasöründe  bir class oluşturuyoruz  --> Execute01
+burda artık kullanılmayan kaydolma işlemi var dı bunu kullanmayacağız ama bilelim diye gösterildi
+
+             ******* bu işlem artık kullanılmıyor*************
+    /*
+        // 1.Adım : Driver a kaydol ma işlemi ==> "JDBS 4 sonrası gerekli değil" >>> Class.forName() yöntemi, Java programına dışarıdan bir sınıf eklemeyi mümkün kılar.
+        Class.forName("org.postgresql.Driver");
+
+        // burada başka kütüphaneden data aldığımız için java  eğer class ı bulamazsam diye endişeleniyor , yani  ya path (adres) yanlışsa
+           o yüzden add exception ile düzeltiyoruz
+
+     */
+-----------------------------------------------------------------------------------------------------------
+
+==> 1. işlem :  database bağlanmaktı , database bağlanmak için bu methodu  kullanıyoruz  --> DriverManager.getConnection()
+
+   Connection connection =  DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres","060512020");
+
+==> 2. işlem : statement oluşturuyoruz
+
+    Statement statement = connection.createStatement();
+
+==> 3. işlem  : query çalıştırma --> resultSet
+                //statement.execute();   //===> execute() bize boolean return eder , eğer biz data çağırıyorsak true , data çağırmıyorsak false döner
+                                         // yani biz bir table oluştururken data çağırıyormuyuz hayır o zaman false döner
+                                         // eğer "select" komutu kullanırsam true döner çünkü data çağırıyorum
+                                         // özet >> execute() metodu içindeki query çalıştırır true veya false döner
+ */
+
+
+
+
+
+
+********  JDBC Driver  ****
+
+  JDBC Driver ve DriverManager, JDBC (Java Database Connectivity) API'si içinde farklı ama birbirine bağlı kavramlardır.
+ İşlevleri ve kullanımları açısından benzerlikler taşırlar, ancak farklı rolleri vardır.
+JDBC Driver: JDBC Driver, belirli bir veritabanı sistemine özgü olan ve JDBC API'sini kullanarak Java programlarıyla veritabanları arasındaki iletişimi sağlayan bir bileşendir.
+ Her veritabanı sistemi için farklı bir JDBC Driver gereklidir. Örneğin, MySQL veritabanıyla iletişim kurmak için MySQL JDBC Driver'ı gereklidir.
+  JDBC Driver, veritabanına bağlanmayı, sorguları çalıştırmayı, veri alma ve güncelleme gibi işlemleri gerçekleştirmeyi mümkün kılar.
+DriverManager: DriverManager, JDBC API'sinin bir parçasıdır ve JDBC Driver'ları yönetmeye yardımcı olan sınıftır. DriverManager, JDBC Driver'larını bulur, yükler ve yönetir.
+ Java uygulamaları DriverManager'ı kullanarak belirli bir veritabanı sistemine bağlantı kurabilir.
+  DriverManager, JDBC URL'si ve gerekirse kullanıcı adı ve parola gibi bağlantı bilgileri ile kullanılır.
+Yani, özetle, JDBC Driver, belirli bir veritabanı sistemine özgü işlemleri gerçekleştiren ve JDBC API'si aracılığıyla veritabanı ile iletişim kuran bir yazılım bileşenidir.
+DriverManager ise Java programlarının JDBC Driver'ları bulup yönetmelerine yardımcı olan JDBC API'sinin bir sınıfıdır.
+Bu iki kavram, JDBC'nin veritabanlarına erişim mekanizmasını oluşturan önemli bileşenlerdir.
+
+
+
+PreparedStatement :
+
+bir SQL sorgusunun önceden derlendiği ve daha sonra tekrar tekrar kullanılabilir hale getirildiği bir Java JDBC özelliğidir.
+Bu özelleştirilmiş sınıf, dinamik verileri içeren SQL ifadeleri oluşturmak ve çalıştırmak için kullanılır.
+PreparedStatement, veritabanı güvenliği ve performansı açısından önemli avantajlar sunar.
+PreparedStatement'ın temel amacı, SQL enjeksiyon saldırılarına karşı daha iyi koruma sağlamaktır.
+SQL enjeksiyonu, kötü niyetli kullanıcıların veritabanı sorgularına zararlı veriler ekleyerek sistemde güvenlik açıkları yaratmaya çalıştığı bir saldırı türüdür.
+PreparedStatement kullanıldığında, dinamik veriler otomatik olarak parametre olarak işlenir ve güvenli bir şekilde sorgu içine yerleştirilir.
+Ayrıca, PreparedStatement'lar daha iyi performans sunar.
+Çünkü veritabanı sorgusu önceden derlenir ve optimize edilir, bu da aynı sorgunun farklı parametre değerleriyle tekrar tekrar çalıştırılmasında daha etkili bir işlem sağlar.
+
+CallableStatement:
+
+Java JDBC API'si kullanılarak veritabanında saklanmış (stored) prosedürleri veya işlevleri çağırmak için kullanılan bir arayüzdür.
+Stored prosedürler veya işlevler, veritabanı içinde önceden tanımlanmış ve saklanmış olan SQL kod bloklarıdır.
+CallableStatement, özellikle veritabanı işlemlerinin daha karmaşık olduğu senaryolarda kullanışlıdır.
+CallableStatement, PreparedStatement gibi çalışır, ancak farkı, CallableStatement'ın veritabanında saklanmış prosedürleri veya işlevleri çağırmak için tasarlanmış olmasıdır.
+Genellikle bu prosedürler, veritabanında işlemleri yürütmek, hesaplamaları yapmak veya veritabanı iş mantığını gerçekleştirmek gibi görevleri yerine getirir.
+
+
+ÖZET :
+
+JDBC (Java Database Connectivity) API'sinde bulunan üç farklı türdeki ifade nesnelerinin özetleri:
+
+Statement:
+
+Temel SQL ifadelerini veritabanına göndermek için kullanılır.
+SQL ifadeleri doğrudan ifadeye eklenir ve her seferinde tamamen yeniden derlenir ve çalıştırılır.
+SQL enjeksiyon riskine daha açıktır, çünkü parametreler direkt olarak eklenmez.
+Performans açısından optimize değildir, çünkü her sorgu yeniden derlenir.
+Genellikle basit sorgular için kullanılır.
+
+PreparedStatement:
+
+Önceden derlenmiş ve veritabanında önbelleğe alınmış SQL ifadelerini veritabanına göndermek için kullanılır.
+Parametreli sorgular oluşturmak ve çalıştırmak için kullanılır, bu da SQL enjeksiyon saldırılarına karşı daha güvenli olmasını sağlar.
+Sorgu, veritabanında bir kez derlendikten sonra farklı parametrelerle tekrar tekrar kullanılabilir, bu da daha iyi performans sağlar.
+Genellikle dinamik verilerin veritabanına eklenmesi gereken durumlar için kullanılır.
+
+CallableStatement:
+
+Veritabanında saklanmış prosedürleri veya işlevleri (stored procedures veya functions) çağırmak için kullanılır.
+Önceden derlenmiş saklanmış prosedür veya işlev çağrıları oluşturur.
+Genellikle veritabanı iş mantığının daha karmaşık olduğu durumlarda kullanılır.
+Parametrelerle çalıştırılabilir ve sonuçları alabilir.
+Özellikle veritabanı tarafında işlemleri yürütmek veya hesaplamaları gerçekleştirmek için kullanılır.
+Bu üç ifade türü, JDBC API'si aracılığıyla Java programlarının veritabanlarıyla etkileşimde bulunmasını sağlayan önemli araçlardır.
+Her biri farklı senaryolar için tasarlanmıştır ve veritabanı işlemlerini daha güvenli ve etkili bir şekilde gerçekleştirmenizi sağlar.
+
+
+
+
+----  Database de veri oluşturup test etmek için kullanılan yol yontemler --------
+
+Tabii ki, veritabanı testlerini gerçekleştirmek için aşağıdaki üç önemli aracı kullanabilirsiniz:
+
+Selenium (Web Otomasyon Aracı):
+
+Selenium, web uygulamalarının otomasyon testlerini yapmak için yaygın olarak kullanılan bir araçtır.
+Veritabanıyla etkileşime giren web tabanlı uygulamaların testlerini otomasyonla yapabilir ve bu sayede veritabanı bağlantıları,
+veri girişleri ve sonuçlarını doğrulama gibi senaryoları test edebilirsiniz.
+
+SQL Sorguları ve İşlemleri:
+
+Veritabanı testlerinin bir parçası olarak SQL sorguları ve işlemleri kullanarak veritabanını sorgulayabilir,
+veri ekleyebilir, güncelleyebilir ve silebilirsiniz. Bu, veritabanının işlevselliğini ve bütünlüğünü test etmek için önemli bir yöntemdir.
+
+
+
+API Testleri:
+
+Veritabanı ile etkileşim halinde olan uygulamaların arayüzlerini test etmek için API (Application Programming Interface) testlerini kullanabilirsiniz.
+API testleri, veritabanına veri gönderme, veri alımı ve doğrulama işlemlerini içerebilir.
+Bu testler, veritabanı ile diğer sistemler arasındaki veri akışını ve doğruluğunu kontrol etmenize yardımcı olur.
+
+Bu üç aracı kullanarak, veritabanınızın işlevselliğini, performansını, güvenliğini ve bütünlüğünü kapsamlı bir şekilde test edebilirsiniz.
+Her bir araç, farklı test senaryolarını destekler ve veritabanınızın doğru çalıştığından emin olmanıza yardımcı olabilir.
+
+
+
+
+
+
+
+
+
+
+
+
+
+*************************************************************************************************************************************************************
+
+
+CREATE TABLE companies
+(
+  company_id SMALLINT,
+  company VARCHAR(20),
+  number_of_employees SMALLINT
+);
+INSERT INTO companies VALUES(100, 'IBM', 12000);
+INSERT INTO companies VALUES(101, 'GOOGLE', 18000);
+INSERT INTO companies VALUES(102, 'MICROSOFT', 10000);
+INSERT INTO companies VALUES(103, 'APPLE', 21000);
+SELECT * FROM companies;
+
+
+
+
+
+
+
+--//1. Örnek:  region id'si 1 olan "country name" değerlerini çağırın.  ---> executeQuery() bize resultSet return eder
+
+select  * from countries;
+select  * from companies;
+
+
+--1. Örnek:  region id'si 1 olan "country name" değerlerini çağırın.
+--CREATE TABLE countries
+--(
+--    country_id CHAR(3),
+--    country_name VARCHAR(50),
+--    region_id SMALLINT
+--);
+--Insert into countries values ('AR','Argentina',2);
+--Insert into countries values ('AU','Australia',3);
+--Insert into countries values ('BE','Belgium',1);
+--Insert into countries values ('BR','Brazil',2);
+--Insert into countries values ('CA','Canada',2);
+--Insert into countries values ('CH','Switzerland',1);
+--Insert into countries values ('CN','China',3);
+--Insert into countries values ('DE','Germany',1);
+--Insert into countries values ('DK','Denmark',1);
+--Insert into countries values ('EG','Egypt',4);
+--Insert into countries values ('FR','France',1);
+--Insert into countries values ('IL','Israel',4);
+--Insert into countries values ('IN','India',3);
+--Insert into countries values ('IT','Italy',1);
+--Insert into countries values ('JP','Japan',3);
+--Insert into countries values ('KW','Kuwait',4);
+--Insert into countries values ('ML','Malaysia',3);
+--Insert into countries values ('MX','Mexico',2);
+--Insert into countries values ('NG','Nigeria',4);
+--Insert into countries values ('NL','Netherlands',1);
+--Insert into countries values ('SG','Singapore',3);
+--Insert into countries values ('UK','United Kingdom',1);
+--Insert into countries values ('US','United States of America',2);
+--Insert into countries values ('ZM','Zambia',4);
+--Insert into countries values ('ZW','Zimbabwe',4);
+
+select * from countries  where region_id = 1
+
+--2.Örnek: "region_id"nin 2'den büyük olduğu "country_id" ve "country_name" değerlerini çağırın.
+select country_id , country_name from countries where region_id > 2
+
+
+CREATE TABLE companies3
+(
+  company_id SMALLINT,
+  company VARCHAR(20),
+  number_of_employees SMALLINT
+);
+INSERT INTO companies3 VALUES(100, 'IBM', 12000);
+INSERT INTO companies3 VALUES(101, 'GOOGLE', 18000);
+INSERT INTO companies3 VALUES(102, 'MICROSOFT', 10000);
+INSERT INTO companies3 VALUES(103, 'APPLE', 21000);
+
+SELECT * FROM companies3;
+
+ --//3.Örnek: "number_of_employees" değeri en düşük olan satırın tüm değerlerini çağırın.
+ --//  select  * from companies3 where  number_of_employees = 1000  --> bu kötü kod dinamik değil
+
+  select  * from companies3 where  number_of_employees = ( select  min(number_of_employees)  from companies3 );
+
+
+
+
+  **********************************************************
+
+
+
+
+
+
+
+
+
+  //1. Örnek: companies3 tablosundan en yüksek ikinci number_of_employees değeri olan company ve number_of_employees değerlerini çağırın.
+        String query = "select * from companies3 order by number_of_employees  desc offset 1 limit 1  ";
+        ResultSet resultSet1 = statement.executeQuery(query);  // şuan burda resultsetin içerisinde  >>   1   101	 GOOGLE	  18000  var
+                                                                // resultset tablo şeklinde getiriyor  !! unutmaa
+
+
+
+
+
+-- 1. Örnek: companies3 tablosundan en yüksek ikinci number_of_employees değeri olan company ve number_of_employees değerlerini çağırın.
+select * from companies3 order by number_of_employees  desc offset 1 limit 1  -- burda limit 1 dediğimiz için bir tane satır getirecek
+
+select max(number_of_employees) from companies3 where number_of_employees < 21000   -- ==> 21000 den küçük en büyük sayı yı bul burası 18000 verir ama dinamik değil
+select max(number_of_employees) from companies3 where number_of_employees < (select max(number_of_employees) from companies3)  -- bu daha dinamik eğer 21000 den küçük en
+                                                                                                                               -- büyük sayıyı verir yani 18000
+                                                                                                                               -- birden fazla olsaydı hepsini verecekti
+
+
+
+select * from companies3 where number_of_employees = (select max(number_of_employees) from companies3 where number_of_employees < (select max(number_of_employees) from companies3)) -- tüm satırı almak için
+
+
+
+
+select* from companies
+select* from countries
+
+--1. Örnek: Prepared statement kullanarak company adı IBM olan number_of_employees değerini 9999 olarak güncelleyin.
+update companies set number_of_employees = 9999 where company = 'IBM';
+
+update companies set number_of_employees = 5000  where number_of_employees = 'GOOGLE';
+
+
+
+--selamlama yapan bir function oluşturup çalıştırınız
+-- mesela 'Merhaba ali Nasılsın ?' diyeceğiz buradaki ali kısmına x diyoruz  --> (x text)
+create or replace function selamlama (x text) returns text --> bize string bir değer dönecek text olarak
+as
+$$
+begin --> başlangıç    --  bunlar süslü parantez gibi
+
+return 'Merhaba' || x || ', Nasılsın ?';  --->  || bu sembol javadaki concatination gibi birleştirme yapıyor
+-- döneceği şeyi buraya yazıyoruz bu bize ne dönecek --> 'Merhaba ali Nasılsın ?'
+
+
+end;   --> bitiş
+$$
+language plpgsql;  --> dilini belirtiyoruz
+
+
+select * from selamlama(' Ali');
+
+
+
+
+
+
+
+
+
+create or replace function selamlama (x text , y text) returns text --> or replace dersek metodu oluştur veya üstüne yaz demek
+as                                                         --> bu sayede devamlı çalıştırabiliriz
+$$
+begin
+
+return 'Merhaba' || x || ', Nasılsın ?' || y ||'.';
+
+
+end;
+$$
+language plpgsql;
+
+
+select * from selamlama(' Ali' , 'Veli');
+--select * from selamlama(' 123'); --> "Merhaba 123, Nasılsın ?"
+
+
+
+
+
+create or replace function selamlama (x text) returns text
+as
+$$
+begin
+return 'Merhaba' || x || ', Nasılsın ?';
+end;
+$$
+language plpgsql;
+
+
+
+
+select * from selamlama(' Ali');
+select  selamlama(' Ali');  --> bu şekilde çağırmak daha mantıklı
